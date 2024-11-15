@@ -19,16 +19,15 @@ def create_account():
 def deposit():
     """Deposit money into an account"""
     user_name = input("Enter your first and last name: ")
+    user_history = []  # account holder all history
+    user_name_index = account_holder.index(user_name)  # on which index the user is located
+    money_index = user_name_index  # money index must == name index
     if user_name in account_holder:
         deposit_money = float(input("What amount would you like to deposit? "))
-        user_history = []  # account holder all history
-        user_name_index = account_holder.index(user_name)  # on which index the user is located
-        money_index = user_name_index  # money index must == name index
-        total_amount = balances[money_index] + deposit_money
-        balances.insert(money_index, total_amount)  # add money to balance
-        user_history.append(total_amount)
+        balances[money_index] += deposit_money
+        user_history.append(balances[money_index])
         transaction_histories.insert(user_name_index, user_history)  # add the transaction action
-        return print(f"You current balance is: {total_amount:.2f}")
+        return print(f"You current balance is: {balances[money_index]:.2f}")
     else:
         return print(f"This account holder name -> {user_name} does not exist.")
 
@@ -37,17 +36,16 @@ def withdraw():
     """Withdraw money from an account"""
     user_name = input("Enter your first and last name: ")
     if user_name in account_holder:
-        print("What amount would you like to withdraw?")
-        withdraw_money = float(input())
+        withdraw_money = float(input("What amount would you like to withdraw?: "))
         user_history = []  # account holder all history
         user_name_index = account_holder.index(user_name)  # on which index the user is located
         user_money_index = user_name_index  # money index must == name index
-        total_amount = balances[user_money_index] - withdraw_money
-        if withdraw_money <= total_amount:
-            balances.insert(user_money_index, total_amount)  # add money to balance
-            user_history.append(total_amount)
+
+        if withdraw_money <= balances[user_money_index]:
+            balances[user_money_index] -= withdraw_money  # add money to balance
+            user_history.append(balances[user_money_index])
             transaction_histories.insert(user_name_index, user_history)  # add the transaction action
-            return print(f"You current balance is: {total_amount:.2f}")
+            return print(f"You current balance is: {balances[user_money_index]:.2f}")
         else:
             return print("Insufficient funds.")
     else:
@@ -73,23 +71,22 @@ def transfer_funds():
     user_history = []
     recipient_history = []
     if (user_name and recipient_name) in account_holder:
-        print(f"What amount would you like to transfer to {recipient_name}?")
-        transfer_money = float(input())
-        # user action
+        transfer_money = float(input(f"What amount would you like to transfer to {recipient_name}? "))
+        # user data
         user_name_index = account_holder.index(user_name)
         user_money_index = user_name_index
-        total_amount = balances[user_money_index]
-        if transfer_money <= total_amount:
-            user_total_amount = total_amount - transfer_money
-            balances.insert(user_money_index, user_total_amount)
-            user_history.append(user_total_amount)
+
+        # recipient data
+        recipient_name_index = account_holder.index(recipient_name)
+        recipient_money_index = recipient_name_index
+
+        if transfer_money <= balances[user_money_index]:
+            balances[user_money_index] -= transfer_money
+            user_history.append(balances[user_money_index])
             transaction_histories.insert(user_name_index, user_history)
             # recipient action
-            recipient_name_index = account_holder.index(recipient_name)
-            recipient_money_index = recipient_name_index
-            recipient_total_amount = balances[recipient_money_index] + transfer_money
-            balances.insert(recipient_money_index, recipient_total_amount)
-            recipient_history.append(total_amount)
+            balances[recipient_money_index] += transfer_money
+            recipient_history.append(balances[recipient_money_index])
             transaction_histories.insert(recipient_name_index, recipient_history)
             return print(f"You have successfully transferred-> {transfer_money:.2f} to {recipient_name}.")
         else:
@@ -225,4 +222,3 @@ def main():
 
 
 main()
-
