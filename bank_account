@@ -108,19 +108,19 @@ def transfer_funds():
 #     # 5. If the account does not exist, inform the user.
 
 
-# def list_accounts():
-#     """List all accounts and their balances."""
-#     if not account_holder == []:
-#         return print(f"There are no accounts in the system.")
-#     else:
-#         users_list = []
-#         for name in account_holder:
-#             name_index = account_holder.index(name)
-#             money_index = name_index
-#             total_amount = balances[money_index]
-#             result = f"Account holder: {name}, Balance: {total_amount}"
-#             users_list.append(result)
-#         return print(users_list)
+def list_accounts():
+    """List all accounts and their balances."""
+    if account_holder == []:
+        return print(f"There are no accounts in the system.")
+    else:
+        users_list = []
+        for name in account_holder:
+            name_index = account_holder.index(name)
+            money_index = name_index
+            total_amount = balances[money_index]
+            result = f"Account holder: {name}, Balance: {total_amount}"
+            users_list.append(result)
+    return print(users_list)
 
 
 def apply_for_loan():
@@ -207,8 +207,8 @@ def main():
             withdraw()
         elif choice == 4:
             check_balance()
-        # elif choice == 5:
-        #     list_accounts()
+        elif choice == 5:
+            list_accounts()
         elif choice == 6:
             transfer_funds()
         # elif choice == 7:
