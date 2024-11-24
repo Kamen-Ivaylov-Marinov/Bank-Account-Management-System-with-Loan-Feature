@@ -7,31 +7,32 @@ INTEREST_RATE = 0.03
 
 
 def create_account():
-    """ Create a new account"""
+    """Create a new account."""
     user_name = input("Enter your first and last name: ")
+    if user_name in account_holder:
+        print("This account already exists.")
+        return
+
     account_holder.append(user_name)
     balances.append(0)
-    transaction_histories.append(0)
     loans.append(0)
-    return print("You have successfully created an account.")
+    transaction_histories.append([])  # Добавяме празен списък за транзакциите на новия потребител
+    print("You have successfully created an account.")
 
 
 def deposit():
-    """Deposit money into an account"""
+    """Deposit money into an account."""
     user_name = input("Enter your first and last name: ")
-    user_name_index = account_holder.index(user_name)
-    money_index = user_name_index
-
-    # Checks if user is in the system
     if user_name in account_holder:
-
-        # Update user's balance
+        user_name_index = account_holder.index(user_name)
         deposit_money = float(input("What amount would you like to deposit? "))
-        balances[money_index] += deposit_money
-        transaction_histories.insert(user_name_index, f"{user_name} has deposited: {deposit_money:.2f} leva")
-        return print(f"You current balance is: {balances[money_index]:.2f} leva")
+        balances[user_name_index] += deposit_money
+
+        # Добавяме запис за транзакция
+        transaction_histories[user_name_index].append(f"Deposited: {deposit_money:.2f} leva")
+        print(f"Your current balance is: {balances[user_name_index]:.2f} leva")
     else:
-        return print(f"This account holder name -> {user_name} does not exist.")
+         print(f"This account holder name -> {user_name} does not exist.")
 
 
 def withdraw():
@@ -72,38 +73,27 @@ def check_balance():
 
 def transfer_funds():
     """Transfer funds between two accounts."""
-
     user_name = input("Enter your first and last name: ")
     recipient_name = input("Enter recipient's first and last name: ")
 
-    # Checks if the user and the recipient are in the system
-    if (user_name and recipient_name) in account_holder:
+    if user_name in account_holder and recipient_name in account_holder:
         transfer_money = float(input(f"What amount would you like to transfer to {recipient_name}? "))
-        # Finds the user data
-        user_name_index = account_holder.index(user_name)
-        user_money_index = user_name_index
+        user_name_index = account_holder.index(user_name)   # user name index
+        recipient_name_index = account_holder.index(recipient_name)     #recipient name index
 
-        # Finds the recipient data
-        recipient_name_index = account_holder.index(recipient_name)
-        recipient_money_index = recipient_name_index
+        if transfer_money <= balances[user_name_index]:
+            balances[user_name_index] -= transfer_money
+            balances[recipient_name_index] += transfer_money
 
-        # Checks if the transfer is bigger than the user's account balance
-        if transfer_money <= balances[user_money_index]:
+            # Add transaction history to user and recipient:
+            user_msg = f"Transferred {float(transfer_money):.2f} leva to {recipient_name}"
+            recipient_msg = f"Received {float(transfer_money):.2f} leva from {user_name}"
+            transaction_histories[user_name_index].append([user_msg])
+            transaction_histories[recipient_name_index].append([recipient_msg])
 
-            # Subtract the transfer from user's balance
-            balances[user_money_index] -= transfer_money
-            transaction_histories.insert(user_name_index,
-                                         f"{user_name} transferred {transfer_money} leva to {recipient_name}")
-
-            # Add the transfer to recipient's balance
-            balances[recipient_money_index] += transfer_money
-            transaction_histories.insert(recipient_name_index,
-                                         f"{recipient_name} has received {transfer_money} leva from {user_name}")
-            return print(f"You have successfully transferred-> {transfer_money:.2f} leva to {recipient_name}.")
+            print(f"You have successfully transferred {transfer_money:.2f} leva to {recipient_name}.")
         else:
-            return print("Insufficient funds.")
-
-        # Checks which name or if both names are not in the system
+            print("Insufficient funds.")
     else:
         if user_name not in account_holder:
             return print(f"This account holder name -> {user_name} does not exist")
@@ -116,18 +106,19 @@ def view_transaction_history():
     """View transaction history for a specific account."""
     user_name = input("Enter your first and last name: ")
     if user_name in account_holder:
-        if transaction_histories == []:
-            return print("There are no transactions history")
-        else:
-            return print(transaction_histories, sep='\n')
+        user_name_index = account_holder.index(user_name)
+        if transaction_histories[user_name_index]:  # Checks if the list is not epty
+            print(transaction_histories[user_name_index], sep='\n')
+        else:   # if it is epty
+            print("There are no transactions in your history.")
     else:
-        return print(f"This account holder name -> {user_name} does not exist")
+        print(f"This account holder name -> {user_name} does not exist.")
 
 
 def list_accounts():
     """List all accounts and their balances."""
     # Scan through the list if it is empty
-    if account_holder == []:
+    if len(account_holder) == 0:
         return print(f"There are no accounts in the system.")
     # If not display Account Holder name and balance
     else:
@@ -174,8 +165,11 @@ def repay_loan():
         user_name_index = account_holder.index(user_name)  # Find the account index
         user_money_index = user_name_index
         total_amount = balances[user_money_index]
+
         # Prompt user for repayment amount
-        repayment_amount = float(input(f"Enter repayment amount (Outstanding loan: {loans[user_name_index]:.2f} leva, Current balance: {total_amount:.2f} leva): "))
+        repayment_amount = float(input(f"Enter repayment amount "
+                                       f"(Outstanding loan: {loans[user_name_index]:.2f} leva, "
+                                       f"Current balance: {total_amount:.2f} leva): "))
         if repayment_amount <= total_amount:
             # Check if the repayment amount is valid
             if repayment_amount <= loans[user_name_index]:
@@ -184,7 +178,8 @@ def repay_loan():
                 loans[user_name_index] -= repayment_amount
 
                 print(
-                    f"Repayment of {repayment_amount:.2f} leva accepted for {user_name}. Remaining loan: {loans[user_name_index]:.2f} leva.")
+                    f"Repayment of {repayment_amount:.2f} leva accepted for {user_name}. "
+                    f"Remaining loan: {loans[user_name_index]:.2f} leva.")
             else:
                 print("Repayment amount exceeds outstanding loan.")
         else:
